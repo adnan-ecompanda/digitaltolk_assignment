@@ -110,3 +110,80 @@
 
  If you want, I can now create a GitHub repository for this project and push the `release/translation-service` branch. If you'd prefer to provide a remote URL, I will use that. Otherwise I'll try to create the repository using your authenticated `gh` CLI session.
 
+**DELIVERY**
+
+This section collects the full delivery instructions required by the PDF and a checklist of actions you can run locally. The root `README.md` is the canonical delivery document.
+
+- Quick verification (what I ran during smoke tests):
+
+	1. Build & start with Docker:
+
+		 ```bash
+		 docker-compose up -d --build
+		 ```
+
+	2. Inside the app container (or from `backend/`):
+
+		 ```bash
+		 # run once
+		 composer install
+		 cp .env.example .env
+		 php artisan key:generate
+		 php artisan migrate --force
+		 php artisan storage:link
+
+		 # seed smoke dataset (I used 1,000)
+		 php artisan translations:generate 1000 --batch=500
+		 ```
+
+	3. Issue a token and upload export (example):
+
+		 ```bash
+		 # issue token (form-encoded)
+		 curl -s -X POST -d "email=me@example.com" http://localhost:8000/api/v1/token
+
+		 # upload export (replace <TOKEN> with returned token)
+		 curl -s -X POST http://localhost:8000/api/v1/translations/export/upload \
+			 -H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json" -d '{"locale":"en"}'
+		 ```
+
+- Full PDF checklist (implemented):
+	- Store translations for multiple locales (`locale` column).
+	- Tag translations via normalized `tags` table and pivot `tag_translation`.
+	- CRUD endpoints + search (by key, tags, q, locale).
+	- JSON export endpoint with streaming at `/api/v1/translations/export`.
+	- `upload` endpoint writes snapshot to `storage/app/public` (CDN-ready).
+	- `translations:generate` command supports 100k+ with batching.
+	- Token-based auth endpoint for issuing bearer tokens (Sanctum).
+	- OpenAPI spec at `/api/v1/openapi.json` and Swagger UI at `/api/v1/docs`.
+	- Docker compose and `backend/Dockerfile.app` included.
+	- Tests (PHPUnit) and coverage tools included; coverage report in `backend/coverage.xml`.
+
+- Performance notes and recommendations:
+	- Streaming export uses `cursor()` and `StreamedResponse` to minimize memory.
+	- For true 100k+ export performance targets (<500ms) you will need a tuned environment (fast SSD, optimized DB, ample RAM, PHP-FPM + Nginx in production, and possibly pre-generated CDN snapshot). The project provides the building blocks.
+
+- How to create a GitHub repository and push `main` (two options):
+
+	Option A — using `gh` (GitHub CLI) if installed and authenticated:
+
+	```bash
+	# from repo root
+	git branch -M main
+	gh repo create <owner>/<repo-name> --private --source=. --remote=origin --push --confirm
+	# the command above will push `main` and set origin
+	```
+
+	Option B — manual (create repo on github.com, then):
+
+	```bash
+	# replace <url> with the HTTPS repo URL from GitHub
+	git remote add origin https://github.com/<owner>/<repo-name>.git
+	git branch -M main
+	git push -u origin main
+	```
+
+	Note: I attempted to create the remote automatically but the `gh` CLI was not available in the environment. If you want, I can provide an interactive step-by-step or help install `gh` and retry the create/push step.
+
+If you want me to push the code now, give me the desired remote repo name (owner/repo) and confirm whether you want the repository private or public, or allow me to create it under your account using `gh` if you prefer me to try again after you install `gh`.
+
