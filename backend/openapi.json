@@ -1,106 +1,293 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Translation Management Service API",
-    "version": "1.0.0",
-    "description": "API for storing, searching and exporting translations"
-  },
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "Token"
-      }
-    }
-  },
-  "paths": {
-    "/api/v1/token": {
-      "post": {
-        "summary": "Issue API token",
-        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "email": {"type":"string"}, "name": {"type":"string"} }, "required": ["email"] } } } },
-        "responses": { "200": { "description": "Token issued" } }
-      }
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Translation Management Service API",
+        "version": "1.0.0",
+        "description": "API for storing, searching and exporting translations"
     },
-    "/api/v1/translations/export": {
-      "get": {
-        "summary": "Export translations for a locale (streamed)",
-        "parameters": [ { "name":"locale","in":"query","schema":{"type":"string"} }, { "name":"per_page","in":"query","schema":{"type":"integer"} }, { "name":"page","in":"query","schema":{"type":"integer"} } ],
-        "responses": { "200": { "description": "JSON object of translations" } }
-      }
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
     },
-    "/api/v1/translations": {
-      "post": {
-        "summary": "Create or update a translation (protected)",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "key": { "type": "string", "example": "greeting.hello" },
-                  "locale": { "type": "string", "example": "en" },
-                  "value": { "type": "string", "example": "Hello" },
-                  "context": { "type": "string", "example": "homepage" },
-                  "tags": { "type": "array", "items": { "type": "string" }, "example": ["web","mobile"] }
+    "paths": {
+        "/api/v1/token": {
+            "post": {
+                "summary": "Issue API token",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "email"
+                                ]
+                            }
+                        }
+                    }
                 },
-                "required": ["key","locale","value"]
-              }
-            }
-          }
-        },
-        "responses": { "200": { "description": "Translation created or updated" } }
-      },
-      "get": {
-        "summary": "List translations (protected)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [
-          { "name": "key", "in": "query", "schema": { "type": "string" } },
-          { "name": "locale", "in": "query", "schema": { "type": "string" } },
-          { "name": "q", "in": "query", "schema": { "type": "string" } },
-          { "name": "tags", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated tags" },
-          { "name": "per_page", "in": "query", "schema": { "type": "integer" } },
-          { "name": "page", "in": "query", "schema": { "type": "integer" } }
-        ],
-        "responses": { "200": { "description": "Paged list of translations" } }
-      }
-    },
-    "/api/v1/translations/{id}": {
-      "get": {
-        "summary": "Get translation by id (protected)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
-        "responses": { "200": { "description": "Translation object" } }
-      },
-      "put": {
-        "summary": "Update translation (protected)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "value": { "type": "string" },
-                  "context": { "type": "string" },
-                  "tags": { "type": "array", "items": { "type": "string" } }
+                "responses": {
+                    "200": {
+                        "description": "Token issued"
+                    }
                 }
-              }
             }
-          }
         },
-        "responses": { "200": { "description": "Translation updated" } }
-      },
-      "delete": {
-        "summary": "Delete translation (protected)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } } ],
-        "responses": { "204": { "description": "Deleted" } }
-      }
+        "/api/v1/translations/export": {
+            "get": {
+                "summary": "Export translations for a locale (streamed)",
+                "parameters": [
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON object of translations"
+                    }
+                }
+            }
+        },
+        "/api/v1/translations": {
+            "post": {
+                "summary": "Create or update a translation (protected)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "key": {
+                                        "type": "string",
+                                        "example": "greeting.hello"
+                                    },
+                                    "locale": {
+                                        "type": "string",
+                                        "example": "en"
+                                    },
+                                    "value": {
+                                        "type": "string",
+                                        "example": "Hello"
+                                    },
+                                    "context": {
+                                        "type": "string",
+                                        "example": "homepage"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "web",
+                                            "mobile"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "key",
+                                    "locale",
+                                    "value"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Translation created or updated"
+                    }
+                }
+            },
+            "get": {
+                "summary": "List translations (protected)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tags",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated tags"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paged list of translations"
+                    }
+                }
+            }
+        },
+        "/api/v1/translations/{id}": {
+            "get": {
+                "summary": "Get translation by id (protected)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Translation object"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update translation (protected)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": "string"
+                                    },
+                                    "context": {
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Translation updated"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete translation (protected)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    }
+                }
+            }
+        }
     }
-  }
 }
