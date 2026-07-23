@@ -187,3 +187,63 @@ This section collects the full delivery instructions required by the PDF and a c
 
 If you want me to push the code now, give me the desired remote repo name (owner/repo) and confirm whether you want the repository private or public, or allow me to create it under your account using `gh` if you prefer me to try again after you install `gh`.
 
+**Testing (for recruiter)**
+
+The following quick steps let a reviewer verify the app and core flows (token auth, CRUD, export, upload, and tests). All commands are run from the repository root unless noted.
+
+- Start the app and DB (Docker):
+
+```bash
+docker-compose up -d --build
+```
+
+- Prepare the Laravel app (inside `backend/` or from host):
+
+```bash
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --force
+php artisan storage:link
+```
+
+- Issue an API token (creates a user if needed):
+
+```bash
+curl -s -X POST http://localhost:8000/api/v1/token -d "email=me@example.com"
+```
+
+- Use Swagger UI for interactive testing:
+
+	- Open: http://localhost:8000/api/v1/docs
+	- Click *Authorize* and paste `Bearer <TOKEN>` (from the token step).
+	- Try protected endpoints: `POST /api/v1/translations`, `GET /api/v1/translations`, `PUT`/`DELETE` etc.
+
+- Quick curl examples (replace `<TOKEN>`):
+
+```bash
+# Create
+curl -s -X POST http://localhost:8000/api/v1/translations \
+	-H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json" \
+	-d '{"key":"greeting.hello","locale":"en","value":"Hello","tags":["ui"]}'
+
+# Stream export
+curl -s http://localhost:8000/api/v1/translations/export?locale=en
+
+# Upload export (returns public URL)
+curl -s -X POST http://localhost:8000/api/v1/translations/export/upload \
+	-H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json" \
+	-d '{"locale":"en"}'
+```
+
+- Run the test suite (backend):
+
+```bash
+cd backend
+composer install --dev
+vendor/bin/phpunit --testdox
+```
+
+If you want me to perform a live demo or seed a large dataset (100k+) and share performance numbers, I can run that and attach results on request.
+
