@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Translation Management Service API",
+    "version": "1.0.0",
+    "description": "API for storing, searching and exporting translations"
+  },
+  "paths": {
+    "/api/v1/token": {
+      "post": {
+        "summary": "Issue API token",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "email": {"type":"string"}, "name": {"type":"string"} }, "required": ["email"] } } } },
+        "responses": { "200": { "description": "Token issued" } }
+      }
+    },
+    "/api/v1/translations/export": {
+      "get": {
+        "summary": "Export translations for a locale (streamed)",
+        "parameters": [ { "name":"locale","in":"query","schema":{"type":"string"} } ],
+        "responses": { "200": { "description": "JSON object of translations" } }
+      }
+    },
+    "/api/v1/translations": {
+      "post": { "summary": "Create or update a translation (protected)" },
+      "get": { "summary": "List translations (protected)" }
+    },
+    "/api/v1/translations/{id}": {
+      "get": { "summary": "Get translation by id (protected)" },
+      "put": { "summary": "Update translation (protected)" },
+      "delete": { "summary": "Delete translation (protected)" }
+    }
+  }
+}
